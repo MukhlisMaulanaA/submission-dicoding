@@ -21,7 +21,7 @@ Follow these steps to set up the project in a virtual environment and run the St
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/submission-dicoding.git
+git clone https://github.com/MukhlisMaulanaA/submission-dicoding.git
 cd submission-dicoding
 ```
 
