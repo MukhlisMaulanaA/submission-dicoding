@@ -24,55 +24,62 @@ sales_per_category = pd.read_csv('dashboard/category_sales.csv')
 sales_per_state['log_price'] = np.log(sales_per_state['price'] + 1)
 
 # Create a dictionary to map seller_state to log_price
-log_sales_dict = sales_per_state.set_index('seller_state')['log_price'].to_dict()
+log_sales_dict = sales_per_state.set_index(
+    'seller_state')['log_price'].to_dict()
 
-# ----- GEOSPATIAL VISUALIZATION -----
-st.title("E-Commerce Sales Dashboard")
-st.markdown("### Distribusi Geografis Penjualan Berdasarkan Negara Bagian")
+with st.container():
+  st.title("E-Commerce Sales Dashboard")
+  
+  # ----- TOP 10 SALES BY PRODUCT CATEGORY -----
+  st.markdown("### Top 10 Kategori Produk Berdasarkan Penjualan")
 
-# Set up Folium map
-m = folium.Map(location=[-15.7801, -47.9292], zoom_start=5)  # Center the map over Brazil
+  # Get top 10 categories by sales
+  top_10_categories = sales_per_category.nlargest(10, 'price')
 
-# Define colormap for sales data
-min_log_sales = min(log_sales_dict.values())
-max_log_sales = max(log_sales_dict.values())
-colormap = LinearColormap(colors=[(255, 246, 150), (6, 77, 0)], vmin=min_log_sales, vmax=max_log_sales)
+  # Create bar chart using Seaborn
+  fig, ax = plt.subplots(figsize=(10, 6))
+  sns.barplot(x='price', y='product_category_name_english',
+              data=top_10_categories, palette='Blues_r', ax=ax)
+  ax.set_title('Top 10 Kategori Produk berdasarkan Total Penjualan')
+  ax.set_xlabel('Total Sales')
+  ax.set_ylabel('Category')
 
-# Add GeoJson layer to the map
-for feature in geojson_data['features']:
-    state_code = feature['properties']['SIGLA']
-    log_total_sales = log_sales_dict.get(state_code, 0)
-    
-    folium.GeoJson(
-        feature,
-        style_function=lambda x, log_total_sales=log_total_sales: {
-            'fillColor': colormap(log_total_sales),  # Use log-transformed sales to color the states
-            'color': 'black',
-            'weight': 2,
-            'fillOpacity': 0.7,
-        },
-        tooltip=f"State: {state_code}, Log Sales: {log_total_sales:.2f}"
-    ).add_to(m)
+  # Display the bar chart in Streamlit
+  st.pyplot(fig)
+  
+  # ----- GEOSPATIAL VISUALIZATION -----
+  st.markdown("### Distribusi Geografis Penjualan Berdasarkan Negara Bagian")
 
-# Display the map
-st_folium(m, width=700, height=500)
+  # Set up Folium map
+  # Center the map over Brazil
+  m = folium.Map(location=[-15.7801, -47.9292], zoom_start=5)
 
-# ----- TOP 10 SALES BY PRODUCT CATEGORY -----
-st.markdown("### Top 10 Kategori Produk Berdasarkan Penjualan")
+  # Define colormap for sales data
+  min_log_sales = min(log_sales_dict.values())
+  max_log_sales = max(log_sales_dict.values())
+  colormap = LinearColormap(
+      colors=[(255, 246, 150), (6, 77, 0)], vmin=min_log_sales, vmax=max_log_sales)
 
-# Get top 10 categories by sales
-top_10_categories = sales_per_category.nlargest(10, 'price')
+  # Add GeoJson layer to the map
+  for feature in geojson_data['features']:
+      state_code = feature['properties']['SIGLA']
+      log_total_sales = log_sales_dict.get(state_code, 0)
 
-# Create bar chart using Seaborn
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(x='price', y='product_category_name_english', data=top_10_categories, palette='Blues_r', ax=ax)
-ax.set_title('Top 10 Kategori Produk berdasarkan Total Penjualan')
-ax.set_xlabel('Total Sales')
-ax.set_ylabel('Category')
+      folium.GeoJson(
+          feature,
+          style_function=lambda x, log_total_sales=log_total_sales: {
+              # Use log-transformed sales to color the states
+              'fillColor': colormap(log_total_sales),
+              'color': 'black',
+              'weight': 2,
+              'fillOpacity': 0.7,
+          },
+          tooltip=f"State: {state_code}, Log Sales: {log_total_sales:.2f}"
+      ).add_to(m)
 
-# Display the bar chart in Streamlit
-st.pyplot(fig)
-
+  # Display the map
+  st_folium(m, width=700, height=500)
+  
 # ----- INSIGHT SECTION -----
 st.markdown("### Insight Utama")
 st.markdown("""
