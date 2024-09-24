@@ -27,7 +27,7 @@ sales_per_state['log_price'] = np.log(sales_per_state['price'] + 1)
 log_sales_dict = sales_per_state.set_index(
     'seller_state')['log_price'].to_dict()
 
-with st.container():
+with st.container(height=1150):
   st.title("E-Commerce Sales Dashboard")
   
   # ----- TOP 10 SALES BY PRODUCT CATEGORY -----
@@ -80,10 +80,11 @@ with st.container():
   # Display the map
   st_folium(m, width=700, height=500)
   
-# ----- INSIGHT SECTION -----
-st.markdown("### Insight Utama")
-st.markdown("""
-- **Negara bagian SP** tetap mendominasi penjualan, bahkan setelah transformasi logaritmik diterapkan.
-- **Kategori produk elektronik dan fashion** menduduki peringkat teratas dalam hal kontribusi terhadap total penjualan.
-- Negara bagian seperti **RJ** dan **MG** memberikan kontribusi besar terhadap penjualan setelah SP, yang menunjukkan potensi peningkatan penjualan di masa depan.
-""")
+with st.container():
+  # ----- INSIGHT SECTION -----
+  st.markdown("### Insight Utama")
+  st.markdown("""
+  - **Negara bagian SP** tetap mendominasi penjualan, bahkan setelah transformasi logaritmik diterapkan.
+  - **Kategori produk elektronik dan fashion** menduduki peringkat teratas dalam hal kontribusi terhadap total penjualan.
+  - Negara bagian seperti **RJ** dan **MG** memberikan kontribusi besar terhadap penjualan setelah SP, yang menunjukkan potensi peningkatan penjualan di masa depan.
+  """)
